@@ -1,34 +1,72 @@
-name: Run EPG Grabber
+name: Update DrewLive EPG Files
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # every 4 hours UTC
-  workflow_dispatch:  # Allows manual execution
+    - cron: '0 */4 * * *'  # Run every 4 hours
+  workflow_dispatch:  # Manual trigger
 
 jobs:
-  run-epg-grabber:
+  update-epg:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Run EPG Grabber script
-        run: python epg-grabber/getEpgs.py
-
-      - name: Configure Git
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
         run: |
-          git config --local user.name "github-actions[bot]"
+          python -m pip install --upgrade pip
+          pip install requests
+      
+      - name: Run EPG script
+        run: python getEpgs.py
+      
+      - name: Create multiple copies
+        run: |
+          cp epg.xml.gz merged_epg.xml.gz
+
+      - name: Copy files to epg-grabber folder
+        run: |
+          cp epg.xml.gz epg-grabber/epg.xml.gz
+      
+      - name: Commit and push (amend to avoid history buildup)
+        run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Commit updated EPG files
+          git config --local user.name "github-actions[bot]"
+          
+          git add epg-grabber/epg.xml.gz
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            # Check if EPG files already exist in repo
+            if git ls-files --error-unmatch merged_epg.xml.gz 2>/dev/null; then
+              # Files exist - amend the last commit that touched these files
+              LAST_EPG_COMMIT=$(git log -1 --pretty=format:%H -- merged_epg.xml.gz)
+              CURRENT_COMMIT=$(git rev-parse HEAD)
+              
+              if [ "$LAST_EPG_COMMIT" = "$CURRENT_COMMIT" ]; then
+                # Last commit was EPG update, amend it
+                git commit --amend -m "EPG files - Updated $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+                git push --force
+              else
+                # Last commit wasn't EPG, create new commit
+                git commit -m "EPG files - Updated $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+                git push
+              fi
+            else
+              # First time adding EPG files
+              git commit -m "EPG files - Initial commit $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+              git push
+            fi
+          fi
+      
+      - name: Cleanup temporary files
+        if: always()
         run: |
-          git add epg-grabber/epg.xml epg-grabber/epg.xml.gz
-          git commit -m "Update EPG files [skip ci]" || echo "No changes to commit"
-
-      - name: Force push latest EPG files
-        run: |
-          git fetch origin main
-          git reset --soft origin/main
-          git commit --amend -m "Update EPG files [skip ci]"
-          git push --force origin main
+          rm -f epg.xml epg.xml.gz
