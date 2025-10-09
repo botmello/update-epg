@@ -1,4 +1,4 @@
-name: Update DrewLive EPG Files
+name: Update EPG Files
 
 on:
   schedule:
