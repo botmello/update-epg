@@ -29,8 +29,6 @@ jobs:
       - name: Create multiple copies
         run: |
           cp epg.xml.gz merged_epg.xml.gz
-          cp epg.xml.gz merged2_epg.xml.gz
-          cp epg.xml.gz merged3_epg.xml.gz
 
       - name: Copy files to epg-grabber folder
         run: |
@@ -41,7 +39,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          git add merged_epg.xml.gz merged2_epg.xml.gz merged3_epg.xml.gz epg-grabber/epg.xml.gz
+          git add epg-grabber/epg.xml.gz
           
           if git diff --cached --quiet; then
             echo "No changes to commit"
