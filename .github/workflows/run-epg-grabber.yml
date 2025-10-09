@@ -1,0 +1,34 @@
+name: Run EPG Grabber
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # every 4 hours UTC
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  run-epg-grabber:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run EPG Grabber script
+        run: python epg-grabber/getEpgs.py
+
+      - name: Configure Git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit updated EPG files
+        run: |
+          git add epg-grabber/epg.xml epg-grabber/epg.xml.gz
+          git commit -m "Update EPG files [skip ci]" || echo "No changes to commit"
+
+      - name: Force push latest EPG files
+        run: |
+          git fetch origin main
+          git reset --soft origin/main
+          git commit --amend -m "Update EPG files [skip ci]"
+          git push --force origin main
