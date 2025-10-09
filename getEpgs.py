@@ -342,12 +342,12 @@ epg_urls = [
 	'https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/Plex/all.xml.gz',
     'https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/PlutoTV/all.xml.gz',
     'https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/SamsungTVPlus/all.xml.gz',
-    'https://raw.githubusercontent.com/BuddyChewChew/localnow-playlist-generator/refs/heads/main/epg.xml.gz',
+    'https://raw.githubusercontent.com/BuddyChewChew/localnow-playlist-generator/refs/heads/main/epg.xml',
     'https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/Roku/all.xml.gz',
-    'https://raw.githubusercontent.com/BuddyChewChew/xumo-playlist-generator/main/playlists/xumo_epg.xml',
+    'https://raw.githubusercontent.com/BuddyChewChew/xumo-playlist-generator/refs/heads/main/playlists/xumo_epg.xml.gz',
     'https://animenosekai.github.io/japanterebi-xmltv/guide.xml',
-    'https://epg.freejptv.com/jp.xml',
     'https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz',
+	'https://tvpass.org/epg.xml',
     'http://drewlive24.duckdns.org:8081/DrewLive.xml.gz'
 ]
 
@@ -357,6 +357,7 @@ playlist_urls = [
 
 if __name__ == "__main__":
     filter_and_build_epg(epg_urls, playlist_urls)
+
 
 
 
