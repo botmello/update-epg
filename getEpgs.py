@@ -96,27 +96,59 @@ def fetch_with_retry(url, timeout=30):
     print(f"  Failed to fetch after {max_retries} attempts")
     return None
 
-def extract_tvg_ids_from_playlist(url):
-    """Extract all tvg-id values from an M3U playlist"""
+def extract_tvg_ids_from_playlist(source):
+    """
+    Extract all tvg-id values from an M3U playlist.
+    Works with:
+      - URL: http(s)://...
+      - Local file path: /path/to/file.m3u8
+    """
     tvg_ids = set()
-    
-    response = fetch_with_retry(url)
-    if response is None:
-        print(f"Failed to fetch playlist {url}")
+
+    # regex supports tvg-id="..." and tvg-id='...'
+    pat = re.compile(r'tvg-id\s*=\s*["\']([^"\']+)["\']', re.IGNORECASE)
+
+    def process_lines(lines, encoding="utf-8"):
+        for line in lines:
+            if not line:
+                continue
+            if isinstance(line, bytes):
+                line = line.decode(encoding, errors="ignore")
+            for m in pat.findall(line):
+                tvg_ids.add(m)
+
+    # URL path
+    if source.lower().startswith(("http://", "https://")):
+        response = fetch_with_retry(source)
+        if response is None:
+            print(f"Failed to fetch playlist {source}")
+            return tvg_ids
+
+        try:
+            if not response.encoding:
+                response.encoding = "utf-8"
+
+            # force bytes, decode ourselves
+            process_lines(response.iter_lines(decode_unicode=False), encoding=response.encoding or "utf-8")
+            print(f"Extracted {len(tvg_ids)} tvg-ids from {source}")
+        except Exception as e:
+            print(f"Error processing playlist {source}: {e}")
+        finally:
+            response.close()
+
         return tvg_ids
-    
+
+    # Local file path
     try:
-        for line in response.iter_lines(decode_unicode=True):
-            if line:
-                matches = re.findall(r'tvg-id="([^"]+)"', line, re.IGNORECASE)
-                tvg_ids.update(matches)
-        
-        print(f"Extracted {len(tvg_ids)} tvg-ids from {url}")
-        
+        with open(source, "rb") as f:
+            # read as bytes lines
+            process_lines(f, encoding="utf-8")
+        print(f"Extracted {len(tvg_ids)} tvg-ids from local file {source}")
     except Exception as e:
-        print(f"Error processing playlist {url}: {e}")
-    
+        print(f"Error processing local playlist {source}: {e}")
+
     return tvg_ids
+
 
 def get_valid_tvg_ids(playlist_urls):
     """Get tvg-ids from both file AND playlist URLs"""
@@ -356,6 +388,7 @@ playlist_urls = [
 
 if __name__ == "__main__":
     filter_and_build_epg(epg_urls, playlist_urls)
+
 
 
 
