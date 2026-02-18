@@ -345,18 +345,18 @@ epg_urls = [
     'https://raw.githubusercontent.com/BuddyChewChew/localnow-playlist-generator/refs/heads/main/epg.xml',
     'https://raw.githubusercontent.com/matthuisman/i.mjh.nz/refs/heads/master/Roku/all.xml.gz',
     'https://raw.githubusercontent.com/BuddyChewChew/xumo-playlist-generator/refs/heads/main/playlists/xumo_epg.xml.gz',
-    'https://animenosekai.github.io/japanterebi-xmltv/guide.xml',
     'https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz',
 	'https://tvpass.org/epg.xml',
-    'http://drewlive24.duckdns.org:8081/DrewLive.xml.gz'
+    'http://drewlive2423.duckdns.org:8081/DrewLive/DrewLive.xml.gz'
 ]
 
 playlist_urls = [
-    'https://github.com/Drewski2423/DrewLive/raw/refs/heads/main/MergedPlaylist.m3u8'
+    'http://drewlive2423.duckdns.org:8081/DrewLive/MergedCleanPlaylist.m3u8'
 ]
 
 if __name__ == "__main__":
     filter_and_build_epg(epg_urls, playlist_urls)
+
 
 
 
